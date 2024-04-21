@@ -7,7 +7,6 @@ type IContainer = 'body' | 'params' | 'query' | 'headers' | 'files';
 const validateRequestMiddleware = (container: IContainer, schema: ObjectSchema<any, any>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('req[container]: ' + JSON.stringify(req[container]))
       if (Object.keys(req[container]).length === 0) {
         return res.status(400).json({
           code: 400,

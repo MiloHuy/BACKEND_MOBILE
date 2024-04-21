@@ -13,11 +13,11 @@ export const orderSchema: Schema<IOrderSchema> = new Schema({
     required: true
   },
   productPrice: {
-    type: Number,
+    type: [Number],
     required: true
   },
   productQuanitiOrder: {
-    type: Number,
+    type: [Number],
     required: true
   },
   productSize: {

@@ -13,3 +13,7 @@ export enum EFireBaseFolder {
   PRODUCTS = 'products',
   BRANDS = 'brands',
 }
+
+export enum EArrayIndex {
+  NOT_FOUND = -1
+}

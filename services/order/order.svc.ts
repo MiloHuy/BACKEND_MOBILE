@@ -3,7 +3,7 @@ import { EPagingDefaults } from "../../constanst/app.const";
 import { ECode, EMessage } from "../../constanst/code-mess.const";
 import { EOrderStatus } from "../../models/orders/interface";
 import { ModalOrder } from "../../models/orders/order.model";
-import { IRequestAddToCart } from "./interface";
+import { IRequestAddToCart, IResposeGetAllProductByUserId } from "./interface";
 
 const getAllOrders = async (
   page: number = EPagingDefaults.pageIndex,
@@ -29,8 +29,7 @@ const getAllOrders = async (
 
 const getAllOrderByUserId = async (
   userId: string,
-  page: number = EPagingDefaults.pageIndex,
-  limit: number = EPagingDefaults.pageSize):
+):
   Promise<any> => {
 
   if (!userId) return {
@@ -39,13 +38,7 @@ const getAllOrderByUserId = async (
   }
 
   try {
-    const skip = (page - 1) * limit;
     const orders = await ModalOrder.find({ userId: userId })
-      .skip(skip)
-      .select({ password: 0, __v: 0, updatedAt: 0 })
-      .sort([['createdAt', 'desc']])
-      .limit(limit);
-
     return orders;
   }
   catch (err) {
@@ -85,6 +78,27 @@ const getAllOrderByStatus = async (
       .limit(limit);
 
     return orders;
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
+const getAllProductOrderByUserId = async (userId: string): Promise<IResposeGetAllProductByUserId> => {
+  if (!userId) {
+    return {
+      code: ECode.NOT_FOUND,
+      message: EMessage.NOT_FIND_USER,
+    }
+  }
+
+  try {
+    const orders = await ModalOrder.find({ userId: userId }, { productId: 1, productPrice: 1, productQuanitiOrder: 1, _id: 0 }).exec();
+    return orders as IResposeGetAllProductByUserId;
   }
   catch (err) {
     return {
@@ -162,6 +176,26 @@ const updateStatusOrder = async (orderId: string, status: EOrderStatus): Promise
   }
 }
 
+const updateOrderByUserId = async (userId: string, order: IRequestAddToCart['body']): Promise<any> => {
+  if (!userId) {
+    return {
+      code: ECode.NOT_FOUND,
+      message: EMessage.NOT_FIND_USER
+    }
+  }
+
+  try {
+    return ModalOrder.findOneAndUpdate({ userId: userId }, order, { new: true })
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
 const removeProductOrder = async (orderId: string, productId: string): Promise<any> => {
   if (!orderId || !productId) {
     return {
@@ -180,14 +214,9 @@ const removeProductOrder = async (orderId: string, productId: string): Promise<a
     }
   }
 }
-
 export {
   confirmOrder,
-  createOrder,
-  getAllOrderByStatus,
-  getAllOrderByUserId,
-  getAllOrders,
-  removeProductOrder,
-  updateStatusOrder
+  createOrder, getAllOrderByStatus,
+  getAllOrderByUserId, getAllOrders, getAllProductOrderByUserId, removeProductOrder, updateOrderByUserId, updateStatusOrder
 };
 

@@ -261,8 +261,8 @@ const handleLikeProduct = catchAsync(
 
 const handleGetAllProductLiked = catchAsync(
   async (req: Request, res: Response) => {
-    const page = Number(req.query.page) || EPagingDefaults.pageIndex;
-    const limit = Number(req.query.limit) || EPagingDefaults.pageSize;
+    const page = Number(req.query.page as string) || EPagingDefaults.pageIndex;
+    const limit = Number(req.query.limit as string) || EPagingDefaults.pageSize;
 
     const product = await getAllProductLiked(page, limit);
 
@@ -272,7 +272,7 @@ const handleGetAllProductLiked = catchAsync(
       });
     }
 
-    return res.status(ECode.SUCCESS).json({
+    return (res as Response).status(ECode.SUCCESS).json({
       status: ECode.SUCCESS,
       message: EMessage.GET_PRODUCT_SUCCESS,
       data: product
@@ -281,7 +281,7 @@ const handleGetAllProductLiked = catchAsync(
 )
 
 const handleSearchProducts = catchAsync(
-  async (req: Request<any, IRequestCreateProduct['query']>, res: Response) => {
+  async (req: Request<any, any, IRequestCreateProduct['query']>, res: Response) => {
 
     const productName = req.query.productName as string;
 

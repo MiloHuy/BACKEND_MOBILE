@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 import { TGender } from "../../models/user/interface";
-
-export interface IResponse {
-  code?: number;
-  message?: string;
-  status?: string;
-}
+import { IResponse } from "../interface";
 
 export interface QueryObject {
   [key: string]: any;

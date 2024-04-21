@@ -1,11 +1,12 @@
 import { EOrderStatus } from "../../models/orders/interface"
+import { IResponse } from "../interface"
 
 export interface IRequestAddToCart {
   body: {
     userId: string,
     productId: string[],
-    productPrice: number,
-    productQuanitiOrder: number,
+    productPrice: number[],
+    productQuanitiOrder: number[],
     productSize: string[],
   }
 }
@@ -41,4 +42,14 @@ export interface IRequestUpdateStatusOrder {
   body: {
     status: EOrderStatus
   }
+}
+
+export interface IResposeGetAllProductByUserId extends IResponse {
+  allProduct?: [
+    {
+      productId: string,
+      productPrice: number,
+      productQuanitiOrder: number,
+    }
+  ]
 }

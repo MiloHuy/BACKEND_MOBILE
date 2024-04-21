@@ -6,5 +6,3 @@ export const genMessRequired = (name: string): string => {
 export const genMessNotValid = (name: string): string => {
   return `${name} không hợp lệ. Vui lòng thử lại.`
 }
-
-
