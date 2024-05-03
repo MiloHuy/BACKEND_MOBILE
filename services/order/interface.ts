@@ -53,3 +53,18 @@ export interface IResposeGetAllProductByUserId extends IResponse {
     }
   ]
 }
+
+export interface IRequestUpdateOrderByField {
+  params: {
+    orderId: string
+  },
+  body: {
+    productId?: string[],
+    productPrice?: number[],
+    productQuanitiOrder?: number[],
+    productSize?: string[],
+    addressOrder?: string,
+    status?: EOrderStatus,
+    confirm?: boolean
+  }
+}

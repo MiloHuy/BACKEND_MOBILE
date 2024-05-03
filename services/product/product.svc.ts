@@ -152,7 +152,7 @@ const createProduct = async (product: any): Promise<any> => {
   }
 
   try {
-    return ModalProduct.create(product)
+    return await ModalProduct.create(product)
   } catch (e) {
     return {
       status: EApiStatus.Error,

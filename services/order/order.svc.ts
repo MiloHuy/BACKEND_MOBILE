@@ -3,7 +3,7 @@ import { EPagingDefaults } from "../../constanst/app.const";
 import { ECode, EMessage } from "../../constanst/code-mess.const";
 import { EOrderStatus } from "../../models/orders/interface";
 import { ModalOrder } from "../../models/orders/order.model";
-import { IRequestAddToCart, IResposeGetAllProductByUserId } from "./interface";
+import { IRequestAddToCart, IRequestUpdateOrderByField, IResposeGetAllProductByUserId } from "./interface";
 
 const getAllOrders = async (
   page: number = EPagingDefaults.pageIndex,
@@ -27,6 +27,24 @@ const getAllOrders = async (
   }
 }
 
+const getOrderById = async (orderId: string): Promise<any> => {
+  if (!orderId) return {
+    code: ECode.NOT_FOUND,
+    message: EMessage.NOT_FOUND_PRODUCT
+  }
+
+  try {
+    return await ModalOrder.findById(orderId)
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
 const getAllOrderByUserId = async (
   userId: string,
 ):
@@ -38,7 +56,7 @@ const getAllOrderByUserId = async (
   }
 
   try {
-    const orders = await ModalOrder.find({ userId: userId })
+    const orders = await ModalOrder.findById({ userId: userId })
     return orders;
   }
   catch (err) {
@@ -99,6 +117,33 @@ const getAllProductOrderByUserId = async (userId: string): Promise<IResposeGetAl
   try {
     const orders = await ModalOrder.find({ userId: userId }, { productId: 1, productPrice: 1, productQuanitiOrder: 1, _id: 0 }).exec();
     return orders as IResposeGetAllProductByUserId;
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
+const getOrderByUserIdAndStatus = async (userId: string, status: EOrderStatus): Promise<any> => {
+  if (!userId) {
+    return {
+      code: ECode.NOT_FOUND,
+      message: EMessage.NOT_FIND_USER
+    }
+  }
+
+  if (!Object.values(EOrderStatus).includes(status)) {
+    return {
+      code: ECode.NOT_FOUND,
+      message: EMessage.NOT_FOUND_PRODUCT
+    }
+  }
+
+  try {
+    return ModalOrder.find({ userId: userId, status: status })
   }
   catch (err) {
     return {
@@ -196,6 +241,46 @@ const updateOrderByUserId = async (userId: string, order: IRequestAddToCart['bod
   }
 }
 
+const updateAddressOrder = async (orderId: string, addressOrder?: string): Promise<any> => {
+  if (!orderId) {
+    return {
+      code: ECode.NOT_FOUND,
+      message: EMessage.NOT_FOUND_PRODUCT
+    }
+  }
+
+  try {
+    return await ModalOrder.findByIdAndUpdate(orderId, { $set: { addressOrder: addressOrder } }, { new: true })
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
+const updateOrderByField = async (orderId: string, field: IRequestUpdateOrderByField['body']): Promise<any> => {
+  if (!orderId) {
+    return {
+      code: ECode.NOT_FOUND,
+      message: EMessage.NOT_FOUND_PRODUCT
+    }
+  }
+
+  try {
+    return ModalOrder.findByIdAndUpdate(orderId, { $set: field }, { new: true })
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
 const removeProductOrder = async (orderId: string, productId: string): Promise<any> => {
   if (!orderId || !productId) {
     return {
@@ -217,6 +302,13 @@ const removeProductOrder = async (orderId: string, productId: string): Promise<a
 export {
   confirmOrder,
   createOrder, getAllOrderByStatus,
-  getAllOrderByUserId, getAllOrders, getAllProductOrderByUserId, removeProductOrder, updateOrderByUserId, updateStatusOrder
+  getAllOrderByUserId,
+  getAllOrders,
+  getAllProductOrderByUserId, getOrderById, getOrderByUserIdAndStatus,
+  removeProductOrder,
+  updateAddressOrder,
+  updateOrderByField,
+  updateOrderByUserId,
+  updateStatusOrder
 };
 

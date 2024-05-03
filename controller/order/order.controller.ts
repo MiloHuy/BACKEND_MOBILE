@@ -5,6 +5,7 @@ import { ECode, EMessage } from "../../constanst/code-mess.const";
 import catchAsync from "../../middlewares/catchAsyncErrors.mid";
 import { IRequestAddToCart, IRequestConfirmOrder, IRequestGetAllOrdersByStatus, IRequestGetAllOrdersByUserId, IRequestUpdateStatusOrder } from "../../services/order/interface";
 import { confirmOrder, createOrder, getAllOrderByStatus, getAllOrderByUserId, getAllOrders, getAllProductOrderByUserId, updateOrderByUserId, updateStatusOrder } from "../../services/order/order.svc";
+import { getProductById } from "../../services/product/product.svc";
 
 const handleGetOrderByUserId = catchAsync(
   async (req: Request, res: Response) => {
@@ -90,7 +91,8 @@ const handleGetAllOrdersByStatus = catchAsync(
     const orders = await getAllOrderByStatus(req.body.status, page, limit, req.params.userId);
 
     if (orders.code && orders.code === ECode.NOT_FOUND) {
-      return res.status(orders.code).json({
+      return res.status(ECode.FAIL).json({
+        code: ECode.FAIL,
         message: orders.message
       });
     }
@@ -101,10 +103,38 @@ const handleGetAllOrdersByStatus = catchAsync(
       });
     }
 
+    const { productId: allProductId } = orders[0]
+
+    let allProducts: any = []
+    if (allProductId && allProductId.length > 0) {
+      allProducts = await Promise.all(allProductId.map(async (id: string) => {
+        const product = await getProductById(id);
+
+        if (product.code && product.code === ECode.NOT_FOUND) {
+          throw new Error(product.message);
+        }
+
+        if (product.status && product.status === EApiStatus.Error) {
+          throw new Error(product.message);
+        }
+
+        return product;
+      }));
+    }
+
     return res.status(ECode.SUCCESS).json({
       status: ECode.SUCCESS,
       message: EMessage.GET_PRODUCT_SUCCESS,
-      data: orders
+      data: {
+        id: orders[0]._id,
+        products: allProducts,
+        productPrice: orders[0].productPrice,
+        productQuanitiOrder: orders[0].productQuanitiOrder,
+        productSize: orders[0].productSize,
+        addressOrder: orders[0].addressOrder,
+        status: orders[0].status,
+        confirm: orders[0].confirm,
+      }
     })
   }
 )
@@ -227,8 +257,7 @@ const handleUpdateOrderByStatus = catchAsync(
 
     return res.status(ECode.SUCCESS).json({
       status: ECode.SUCCESS,
-      message: EMessage.GET_PRODUCT_SUCCESS,
-      data: orders
+      message: EMessage.UPDATE_STATUS_ORDER_SUCCESSFULLY,
     })
   }
 )
@@ -236,7 +265,9 @@ const handleUpdateOrderByStatus = catchAsync(
 export {
   handleAddToCart,
   handleConfirmOrder,
-  handleGetAllOrders, handleGetAllOrdersByStatus, handleGetAllOrdersByUserId,
+  handleGetAllOrders,
+  handleGetAllOrdersByStatus,
+  handleGetAllOrdersByUserId,
   handleGetOrderByUserId,
   handleUpdateOrderByStatus
 };

@@ -2,7 +2,41 @@ import { EApiStatus } from "../../constanst/api.const"
 import { ECode, EMessage } from "../../constanst/code-mess.const"
 import { EStatusPayment } from "../../models/payments/interface"
 import { ModalPayment } from "../../models/payments/payments.model"
-import { ICreatePayment } from "./interface"
+import { ICreatePayment, IRequestGetPaymentByField } from "./interface"
+
+const getUserByStatusPayment = async (userId: string, status: EStatusPayment): Promise<any> => {
+  if (!userId || !Object.values(EStatusPayment).includes(status)) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.BAD_REQUEST,
+      message: EMessage.BAD_REQUEST
+    }
+  }
+
+  try {
+    return await ModalPayment.find({ userId }).where(status).exec()
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
+
+const getPaymentByField = async (field: IRequestGetPaymentByField): Promise<any> => {
+  try {
+    return await ModalPayment.find(field).exec()
+  }
+  catch (err) {
+    return {
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    }
+  }
+}
 
 const createPayment = async (payment: ICreatePayment['body']): Promise<any> => {
   try {
@@ -39,7 +73,6 @@ const updateStatusPayment = async (paymentId: string, status: EStatusPayment): P
 }
 
 export {
-  createPayment,
-  updateStatusPayment
+  createPayment, getPaymentByField, getUserByStatusPayment, updateStatusPayment
 }
 

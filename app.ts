@@ -9,6 +9,7 @@ import routerBrand from "./router/brand.router";
 import routerCategory from "./router/category.router";
 import routerFile from "./router/file.router";
 import routerOrder from "./router/orders.router";
+import routerPayment from "./router/payment.router";
 import routerProduct from "./router/product.router";
 import routerUser from "./router/user.router";
 
@@ -29,6 +30,7 @@ app.use(routerProduct)
 app.use(routerCategory)
 app.use(routerBrand)
 app.use(routerOrder)
+app.use(routerPayment)
 
 app.use('*', (req, res) => {
   console.log('request path:', req.path)

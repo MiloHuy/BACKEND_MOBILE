@@ -12,6 +12,7 @@ export enum EOrderStatus {
 export interface IOrderSchema extends Document {
   userId: typeof mongoose.Types.ObjectId;
   productId: typeof mongoose.Schema.ObjectId[];
+  brandId: typeof mongoose.Schema.ObjectId[];
   productPrice: number[];
   productQuanitiOrder: number[];
   productSize: string[];

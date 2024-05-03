@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { IProductSchema } from "./interface";
 
 export const productSchema: Schema<IProductSchema> = new Schema({
@@ -9,23 +9,23 @@ export const productSchema: Schema<IProductSchema> = new Schema({
     type: String,
   },
   category_id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'categories',
   },
   brand_id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'brands'
   },
   order_id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'orders'
   },
   discount_id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'discounts'
   },
   user_id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
   },
   price: {
     type: [Number],

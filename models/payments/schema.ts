@@ -1,23 +1,26 @@
 import { Schema } from "mongoose";
+import { nameModelOrders } from "../orders/order.model";
+import { nameModelUser } from "../user/user.modal";
 import { EPaymentMethod, EStatusPayment, IPaymentSchema } from "./interface";
 
 export const paymentSchema: Schema<IPaymentSchema> = new Schema({
   method: {
     type: String,
-    enum: EPaymentMethod
+    enum: EPaymentMethod,
+    default: EPaymentMethod.COD
   },
   orderId: {
-    type: Schema.Types.ObjectId,
-    ref: 'orders',
+    type: String,
+    ref: nameModelOrders,
   },
   userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'users',
+    type: String,
+    ref: nameModelUser,
   },
   status: {
     type: String,
     enum: EStatusPayment,
-    default: 'NOT_PAYMENT'
+    default: EStatusPayment.NOT_PAYMENT
   }
 }, {
   timestamps: true

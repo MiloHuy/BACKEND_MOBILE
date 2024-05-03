@@ -8,6 +8,7 @@ import { getCategoryByName } from "../../services/category/category.svc";
 import { IRequestCreateProduct } from "../../services/product/interface";
 import { createProduct, getAllProductLiked, getAllProducts, getBestSellerProducts, getProductByCategoryId, getProductByCategoryName, getProductById, likeProduct, searchProducts, Sort } from "../../services/product/product.svc";
 import { handleUploadFileUtils } from "../../utils/file.utils";
+import { checkDataFromDb, isDataObject } from "../utils";
 
 const handleGetAllProducts = catchAsync(
   async (req: Request, res: Response) => {
@@ -144,57 +145,30 @@ const handleCreateProduct = catchAsync(
 
     const fileUpload = await handleUploadFileUtils(req.file, 'products')
 
-    const categoryId = await getCategoryByName(productReq.category);
+    const category = await getCategoryByName(productReq.category);
+    if (!isDataObject(category)) return res.status(ECode.FAIL).json({
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    })
 
-    if (categoryId === null) {
-      return res.status(ECode.FAIL).json({
-        code: ECode.NOT_FOUND,
-        message: EMessage.NOT_FOUND_CATEGORY
-      });
-    }
+    const checkCategory = checkDataFromDb(category, EMessage.NOT_FOUND_CATEGORY, res)
+    if (checkCategory !== true) return checkCategory
 
-    if (categoryId.code && categoryId.code === ECode.NOT_FOUND) {
-      return res.status(categoryId.code).json({
-        code: categoryId.code,
-        message: categoryId.message
-      });
-    }
-
-    if (categoryId.status && categoryId.status === EApiStatus.Error) {
-      return res.status(categoryId.code as number).json({
-        code: categoryId.code,
-        message: categoryId.message
-      });
-    }
-
-    const brandId = await getBrandByName(productReq.brand);
-
-    if (brandId === null) {
-      return res.status(ECode.FAIL).json({
-        code: ECode.NOT_FOUND,
-        message: EMessage.NOT_FOUND_BRAND
-      });
-    }
-
-    if (brandId.code && brandId.code === ECode.NOT_FOUND) {
-      return res.status(brandId.code).json({
-        code: brandId.code,
-        message: brandId.message
-      });
-    }
-
-    if (brandId.status && brandId.status === EApiStatus.Error) {
-      return res.status(brandId.code as number).json({
-        code: brandId.code,
-        message: brandId.message
-      });
-    }
+    const brand = await getBrandByName(productReq.brand);
+    if (!isDataObject(brand)) return res.status(ECode.FAIL).json({
+      status: EApiStatus.Error,
+      code: ECode.MONGO_SERVER_ERROR,
+      message: EMessage.MONGO_SERVER_ERROR
+    })
+    const checkBrand = checkDataFromDb(brand, EMessage.NOT_FOUND_BRAND, res)
+    if (checkBrand !== true) return checkBrand
 
     const product = await createProduct({
       productName: productReq.productName,
       productImg: fileUpload.urlFile ? fileUpload.urlFile : '',
-      category_id: categoryId._id,
-      brand_id: brandId._id,
+      category_id: category._id,
+      brand_id: brand._id,
       price: productReq.price,
       size: productReq.size,
       productRate: productReq.rate,
@@ -202,17 +176,8 @@ const handleCreateProduct = catchAsync(
       quantity: productReq.quantity
     });
 
-    if (product.code && product.code === ECode.NOT_FOUND) {
-      return res.status(product.code).json({
-        message: product.message
-      });
-    }
-
-    if (product.status && product.status === EApiStatus.Error) {
-      return res.status(product.code).json({
-        message: product.message
-      });
-    }
+    const checkProduct = checkDataFromDb(product, EMessage.NOT_FOUND_PRODUCT, res)
+    if (checkProduct !== true) return checkProduct
 
     return res.status(ECode.SUCCESS).json({
       status: ECode.SUCCESS,

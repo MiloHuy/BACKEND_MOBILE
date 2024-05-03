@@ -15,4 +15,5 @@ export interface IPaymentSchema extends Document {
   orderId: typeof mongoose.Schema.ObjectId;
   userId: typeof mongoose.Schema.ObjectId;
   status: string;
+  addressOrder: string;
 }

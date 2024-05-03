@@ -31,7 +31,7 @@ const getCategoryByName = async (categoryName: string): Promise<Record<string, u
   }
 
   try {
-    return ModalCategory.findOne({ categoryName })
+    return await ModalCategory.findOne({ categoryName })
   } catch (e) {
     return {
       status: EApiStatus.Error,

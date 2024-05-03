@@ -38,7 +38,7 @@ const getBrandById = async (brandId: string): Promise<any> => {
   }
 }
 
-const getBrandByName = async (brandName: string): Promise<any> => {
+const getBrandByName = async (brandName: string): Promise<Record<string, unknown> | null> => {
   if (!brandName) {
     return {
       code: ECode.NOT_FOUND,
@@ -46,7 +46,7 @@ const getBrandByName = async (brandName: string): Promise<any> => {
     }
   }
   try {
-    return ModalBrand.findOne({ brandName: brandName })
+    return await ModalBrand.findOne({ brandName: brandName })
   } catch (err) {
     return {
       status: EApiStatus.Error,
